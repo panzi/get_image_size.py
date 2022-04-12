@@ -21,18 +21,18 @@ __all__ = 'UnknownImageFormat', 'get_image_size'
 #-------------------------------------------------------------------------------
 
 TIFF_TYPES = [
-    (1, "B"),  # BYTE
-    (1, "c"),  # ASCII
-    (2, "H"),  # SHORT
-    (4, "L"),  # LONG
-    (8, "LL"), # RATIONAL
-    (1, "b"),  # SBYTE
-    (1, "c"),  # UNDEFINED
-    (2, "h"),  # SSHORT
-    (4, "l"),  # SLONG
-    (8, "ll"), # SRATIONAL
-    (4, "f"),  # FLOAT
-    (8, "d")   # DOUBLE
+    (1, "B"),  #  1 BYTE
+    (1, "c"),  #  2 ASCII
+    (2, "H"),  #  3 SHORT
+    (4, "L"),  #  4 LONG
+    (8, "LL"), #  5 RATIONAL
+    (1, "b"),  #  6 SBYTE
+    (1, "c"),  #  7 UNDEFINED
+    (2, "h"),  #  8 SSHORT
+    (4, "l"),  #  9 SLONG
+    (8, "ll"), # 10 SRATIONAL
+    (4, "f"),  # 11 FLOAT
+    (8, "d")   # 12 DOUBLE
 ]
 
 TIFF_TYPES_BE = [(sz, '>' + fmt) for sz, fmt in TIFF_TYPES]
@@ -251,13 +251,22 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                         typeSize, typeChar = tiffTypes[ftype - 1]
                         input.seek(entryOffset + 8)
                         bvalue = input.read(typeSize)
-                        value = int(unpack(typeChar, bvalue)[0])
+                        if ftype == 5 or ftype == 10:
+                            # rational
+                            a, b = unpack(typeChar, bvalue)[0]
+                            value = int(a) // int(b)
+                        else:
+                            value = int(unpack(typeChar, bvalue)[0])
+
+                        if value < 0:
+                            value = 0
+
                         if tag == 256:
                             width  = value
                         else:
                             height = value
-                    if width > -1 and height > -1:
-                        return width, height
+                        if width > -1 and height > -1:
+                            return width, height
 
                 raise UnknownImageFormat(file_path, 'TIFF')
             except Exception as error:

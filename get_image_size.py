@@ -198,6 +198,8 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
 
             chunk_offset = 8
             chunk_size = sub_chunk_size
+            if chunk_size < 12:
+                raise UnknownImageFormat(file_path, 'AVIF')
             data = input.read(12)
             if len(data) < 12:
                 raise UnknownImageFormat(file_path, 'AVIF')

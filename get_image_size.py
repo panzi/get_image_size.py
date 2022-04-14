@@ -318,6 +318,7 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             return width, height
         elif data.startswith(b"\x76\x2f\x31\x01") and size > 8 and (data[4] == 0x01 or data[4] == 0x02):
             # OpenEXR
+            # https://www.openexr.com/documentation/openexrfilelayout.pdf
             input.seek(8)
             while True:
                 name_buf = bytearray()

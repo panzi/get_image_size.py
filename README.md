@@ -22,6 +22,7 @@ Supported file formats:
 
 * AVIF
 * BMP
+* DDS
 * GIF
 * ICO
 * JPEG

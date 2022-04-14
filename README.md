@@ -25,6 +25,7 @@ Supported file formats:
 * GIF
 * ICO
 * JPEG
+* OpenEXR
 * PNG
 * PSD
 * QOI

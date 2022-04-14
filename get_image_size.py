@@ -297,6 +297,52 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                     width  = w
                     height = h
             return width, height
+        elif data.startswith(b"\x76\x2f\x31\x01") and size > 8 and (data[4] == 0x01 or data[4] == 0x02):
+            # OpenEXR
+            input.seek(8)
+            while True:
+                name_buf = bytearray()
+                while True:
+                    chunk = input.read(1)
+                    if not chunk:
+                        raise UnknownImageFormat(file_path, 'OpenEXR')
+                    byte = chunk[0]
+                    if byte == 0:
+                        break
+                    name_buf.append(byte)
+
+                if len(name_buf) == 0:
+                    break
+
+                type_buf = bytearray()
+                while True:
+                    chunk = input.read(1)
+                    if not chunk:
+                        raise UnknownImageFormat(file_path, 'OpenEXR')
+                    byte = chunk[0]
+                    if byte == 0:
+                        break
+                    type_buf.append(byte)
+
+                size_buf = input.read(4)
+                if len(size_buf) < 4:
+                    raise UnknownImageFormat(file_path, 'OpenEXR')
+                size, = unpack("<I", size_buf)
+
+                if name_buf == b"displayWindow":
+                    if type_buf != b"box2i" or size != 16:
+                        raise UnknownImageFormat(file_path, 'OpenEXR')
+
+                    box_buf = input.read(16)
+                    x1, y1, x2, y2 = unpack("<iiii", box_buf)
+                    width  = x2 - x1 + 1
+                    height = y2 - y1 + 1
+                    if width <= 0 or height <= 0:
+                        raise UnknownImageFormat(file_path, 'OpenEXR')
+                    return width, height
+                else:
+                    input.seek(size, 1)
+            raise UnknownImageFormat(file_path, 'OpenEXR')
 
     raise UnknownImageFormat(file_path)
 

@@ -372,6 +372,8 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             return width, height
         elif size >= 20 and data.startswith(b"DDS \x7C\0\0\0") and unpack("<I", data[8:12])[0] & 0x1007:
             # DDS
+            # http://doc.51windows.net/directx9_sdk/graphics/reference/DDSFileReference/ddsfileformat.htm
+            # https://docs.microsoft.com/en-us/windows/win32/direct3ddds/dds-header
             height, width = unpack("<II", data[12:20])
             return width, height
         elif size >= 30 and data[1] < 2 and data[2] < 12 and is_tga(input):

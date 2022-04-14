@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from io import BufferedReader
 from typing import Tuple, Optional
 from os import fstat, walk
 from os.path import isdir, join as join_path
@@ -59,6 +60,11 @@ class UnknownImageFormat(Exception):
         self.file_path  = file_path
         self.format     = format
         self.sub_format = sub_format
+
+def is_tga(file: BufferedReader) -> bool:
+    file.seek(-18, 2)
+    sig = file.read(18)
+    return sig == b"TRUEVISION-XFILE.\0"
 
 def get_image_size(file_path: str) -> Tuple[int, int]:
     """
@@ -356,7 +362,17 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                 else:
                     input.seek(size, 1)
             raise UnknownImageFormat(file_path, 'OpenEXR')
-    # TODO: PCX, TGA
+        elif size >= 30 and data[0] == 0x0A and data[1] < 6 and data[2] < 2 and data[3] in (1, 2, 4, 8):
+            # PCX
+            x1, y1, x2, y2 = unpack("<HHHH", data[4:12])
+            width  = x2 - x1 + 1
+            height = y2 - y1 + 1
+            if width <= 0 or height <= 0:
+                raise UnknownImageFormat(file_path, 'PCX')
+            return width, height
+        elif size >= 30 and data[1] < 2 and data[2] < 12 and is_tga(input):
+            # TGA
+            return unpack("<HH", data[12:16])
 
     raise UnknownImageFormat(file_path)
 

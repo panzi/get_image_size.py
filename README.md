@@ -26,9 +26,11 @@ Supported file formats:
 * ICO
 * JPEG
 * OpenEXR
+* PCX
 * PNG
 * PSD
 * QOI
+* TGA
 * TIFF
 * WEBP
 * XCF

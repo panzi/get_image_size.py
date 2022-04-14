@@ -100,7 +100,8 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                     b0 = b[0]
                     if b0 >= 0xC0 and b0 <= 0xC3:
                         input.seek(3, 1)
-                        return unpack(">HH", input.read(4))
+                        height, width = unpack(">HH", input.read(4))
+                        return width, height
                     else:
                         input.seek(unpack(">H", input.read(2))[0] - 2, 1)
                     b = input.read(1)
@@ -128,6 +129,18 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                 w, h = unpack("<HH", data[26:30])
                 width  = w & 0x3ffff
                 height = h & 0x3ffff
+            elif hdr == b'VP8X':
+                w1 = data[24]
+                w2 = data[25]
+                w3 = data[26]
+                h1 = data[27]
+                h2 = data[28]
+                h3 = data[29]
+
+                width  = (w1 | w2 << 8 | w3 << 16) + 1
+                height = (h1 | h2 << 8 | h3 << 16) + 1
+
+                return width, height
             else:
                 raise UnknownImageFormat(file_path, 'WEBP')
             return width, height
@@ -343,6 +356,7 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                 else:
                     input.seek(size, 1)
             raise UnknownImageFormat(file_path, 'OpenEXR')
+    # TODO: PCX, TGA
 
     raise UnknownImageFormat(file_path)
 
@@ -361,7 +375,6 @@ def main() -> None:
                         print(file_path, width, height)
         else:
             file_path = path
-            width, height = get_image_size(file_path)
             try:
                 width, height = get_image_size(file_path)
             except Exception as error:

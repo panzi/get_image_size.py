@@ -24,6 +24,7 @@ Supported file formats:
 * BMP
 * DDS
 * GIF
+* HEIC/HEIF
 * ICO
 * JPEG
 * OpenEXR

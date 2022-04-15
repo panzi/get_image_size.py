@@ -150,10 +150,12 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             else:
                 raise UnknownImageFormat(file_path, 'WEBP')
             return width, height
-        elif data[4:12] == b'ftypavif':
+        elif data[4:12] in (b'ftypavif', b'ftypheic'):
             # AVIF
             ftype_size, = unpack(">I", data[0:4])
             input.seek(ftype_size)
+
+            format = 'AVIF' if data[8:12] == b'avif' else 'HEIC'
 
             # chunk nesting: meta > iprp > ipco > ispe
             # search meta chunk
@@ -161,7 +163,7 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             while True:
                 data = input.read(8)
                 if len(data) < 8:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 chunk_size, = unpack(">I", data[0:4])
                 if data.endswith(b'meta'):
                     break
@@ -173,10 +175,10 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             # search iprp
             while True:
                 if chunk_offset >= chunk_size:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 data = input.read(8)
                 if len(data) < 8:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 sub_chunk_size, = unpack(">I", data[0:4])
                 if data.endswith(b'iprp'):
                     break
@@ -189,10 +191,10 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             # search ipco
             while True:
                 if chunk_offset >= chunk_size:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 data = input.read(8)
                 if len(data) < 8:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 sub_chunk_size, = unpack(">I", data[0:4])
                 if data.endswith(b'ipco'):
                     break
@@ -205,10 +207,10 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             # search ispe
             while True:
                 if chunk_offset >= chunk_size:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 data = input.read(8)
                 if len(data) < 8:
-                    raise UnknownImageFormat(file_path, 'AVIF')
+                    raise UnknownImageFormat(file_path, format)
                 sub_chunk_size, = unpack(">I", data[0:4])
                 if data.endswith(b'ispe'):
                     break
@@ -218,10 +220,10 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             chunk_offset = 8
             chunk_size = sub_chunk_size
             if chunk_size < 12:
-                raise UnknownImageFormat(file_path, 'AVIF')
+                raise UnknownImageFormat(file_path, format)
             data = input.read(12)
             if len(data) < 12:
-                raise UnknownImageFormat(file_path, 'AVIF')
+                raise UnknownImageFormat(file_path, format)
             return unpack(">II", data[4:])
         elif data.startswith(b'BM') and data[6:10] == b'\0\0\0\0' and size >= 26:
             # BMP

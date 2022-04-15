@@ -151,7 +151,7 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
                 raise UnknownImageFormat(file_path, 'WEBP')
             return width, height
         elif data[4:12] in (b'ftypavif', b'ftypheic'):
-            # AVIF
+            # AVIF and HEIC
             ftype_size, = unpack(">I", data[0:4])
             input.seek(ftype_size)
 

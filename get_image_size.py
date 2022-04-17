@@ -82,13 +82,14 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             return unpack("<HH", data[6:10])
         elif data.startswith(b'\211PNG\r\n\032\n'):
             # PNG
-            if size >= 24 and data[12:16] == b'IHDR':
-                return unpack(">LL", data[16:24])
-            elif size >= 16:
-                # older PNGs?
-                return unpack(">LL", data[8:16])
-            else:
+            if size < 24:
                 raise UnknownImageFormat(file_path, 'PNG')
+
+            chunk_size, = unpack(">L", data[8:12])
+            if chunk_size < 0 or data[12:16] != b'IHDR':
+                raise UnknownImageFormat(file_path, 'PNG')
+
+            return unpack(">LL", data[16:24])
         elif size >= 7 and data.startswith(b'\377\330'):
             # JPEG
             input.seek(3)

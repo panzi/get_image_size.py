@@ -226,9 +226,20 @@ def get_image_size(file_path: str) -> Tuple[int, int]:
             if len(data) < 12:
                 raise UnknownImageFormat(file_path, format)
             return unpack(">II", data[4:])
-        elif data.startswith(b'BM') and data[6:10] == b'\0\0\0\0' and size >= 26:
+        elif data.startswith(b'BM') and data[6:10] == b'\0\0\0\0':
             # BMP
-            width, height = unpack("<ii", data[18:26])
+            file_size, = unpack("<I", data[2:6])
+            min_size = min(file_size, size)
+            if min_size < 22:
+                raise UnknownImageFormat(file_path, 'BMP')
+
+            header_size, = unpack("<I", data[14:18])
+            if header_size == 12:
+                width, height = unpack("<hh", data[18:24])
+            else:
+                if min_size < 26 or header_size <= 12:
+                    raise UnknownImageFormat(file_path, 'BMP')
+                width, height = unpack("<ii", data[18:26])
             # height is negative when stored upside down
             return width, abs(height)
         elif size >= 8 and (data.startswith(b"II\052\000") or data.startswith(b"MM\000\052")):

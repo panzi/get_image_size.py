@@ -1,21 +1,30 @@
 get_image_size.py
 =================
 
-Tiny Python library that only reads the size of an image with no external dependencies.
+Tiny Python library that only reads the width and height of an image with no external dependencies.
 
 ```Python
-class UnknownImageFormat(Exception):
-    file_path: str
-    format: Optional[str]
-    sub_format: Optional[str]
+class ImFormat(Enum): ...
 
-    def __init__(self, file_path: str, format: Optional[str]=None, sub_format: Optional[str]=None) -> None:
+class ImError(Exception): ...
+class UnsupportedFormat(ImError): ...
+class ParserError(ImError):
+    format: ImFormat
 
-def get_image_size(file_path: str) -> Tuple[int, int]:
+class ImInfo(NamedTuple):
+    width:  int
+    height: int
+    format: ImFormat
+
+def get_image_size(input: Union[str, PathLike, bytes, bytearray, memoryview, IO[bytes]]) -> ImInfo:
     """
-    Return (width, height) for a given image file content.
-    File must be seekable. May throw UnknownImageFormat.
+    Return (width, height, format) for a given image file content.
+    input must be seekable. May raise ImError.
     """
+
+def get_image_size_from_path(file_path: Union[str, PathLike]) -> ImInfo: ...
+def get_image_size_from_buffer(buffer: Union[bytes, bytearray, memoryview]) -> ImInfo: ...
+def get_image_size_from_reader(input: IO[bytes]) -> ImInfo: ...
 ```
 
 Supported file formats:
@@ -27,6 +36,7 @@ Supported file formats:
 * HEIC/HEIF
 * ICO
 * JPEG
+* JPEG 2000
 * OpenEXR
 * PCX
 * PNG

@@ -18,7 +18,7 @@ class ImInfo(NamedTuple):
 
 def get_image_size(input: Union[str, PathLike, bytes, bytearray, memoryview, IO[bytes]]) -> ImInfo:
     """
-    Return (width, height, format) for a given image file content.
+    Return (width, height, format) for a given image file.
     input must be seekable. May raise ImError.
     """
 
@@ -27,7 +27,7 @@ def get_image_size_from_buffer(buffer: Union[bytes, bytearray, memoryview]) -> I
 def get_image_size_from_reader(input: IO[bytes]) -> ImInfo: ...
 ```
 
-Supported file formats:
+## Supported File Formats
 
 * AVIF
 * BMP
@@ -46,3 +46,11 @@ Supported file formats:
 * TIFF
 * WEBP
 * XCF
+
+No guarantees of correct or complete implementation are made.
+
+## Related Work
+
+* [panzi/imsz](https://github.com/panzi) – a very similar library in Rust with C bindings
+* [scardine/imsz](https://github.com/scardine/imsz) – original Rust library from which the other is a fork
+* [StackOverflow anwer](https://stackoverflow.com/a/19035508/277767) – the start of it all

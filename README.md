@@ -53,4 +53,4 @@ No guarantees of correct or complete implementation are made.
 
 * [panzi/imsz](https://github.com/panzi/imsz) – a very similar library in Rust with C bindings
 * [scardine/imsz](https://github.com/scardine/imsz) – original Rust library from which the other is a fork
-* [StackOverflow anwer](https://stackoverflow.com/a/19035508/277767) – the start of it all
+* [StackOverflow answer](https://stackoverflow.com/a/19035508/277767) – the start of it all

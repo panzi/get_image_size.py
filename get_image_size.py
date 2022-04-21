@@ -57,7 +57,7 @@ class ImFormat(Enum):
     PCX     = 13
     TGA     = 14
     DDS     = 15
-    HEIC    = 16
+    HEIF    = 16
     JP2K    = 17
 
     def __str__(self) -> str:
@@ -79,7 +79,7 @@ FORMAT_NAMES: Dict[ImFormat, str] = {
     ImFormat.PCX    : 'PCX',
     ImFormat.TGA    : 'TGA',
     ImFormat.DDS    : 'DDS',
-    ImFormat.HEIC   : 'HEIC',
+    ImFormat.HEIF   : 'HEIF',
     ImFormat.JP2K   : 'JPEG 2000',
 }
 
@@ -237,11 +237,11 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo:
 
         return ImInfo(width, height, ImFormat.WEBP)
     elif data[4:12] in (b'ftypavif', b'ftypheic'):
-        # AVIF and HEIC
+        # AVIF and HEIF
         ftype_size, = unpack(">I", data[0:4])
         input.seek(ftype_size)
 
-        format = ImFormat.AVIF if data[8:12] == b'avif' else ImFormat.HEIC
+        format = ImFormat.AVIF if data[8:12] == b'avif' else ImFormat.HEIF
 
         # chunk nesting: meta > iprp > ipco > ispe
         # search meta chunk

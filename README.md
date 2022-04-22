@@ -32,6 +32,7 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo: ...
 * AVIF
 * BMP
 * DDS
+* DIB
 * GIF
 * HEIC/HEIF
 * ICO

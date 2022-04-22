@@ -59,6 +59,7 @@ class ImFormat(Enum):
     DDS     = 15
     HEIF    = 16
     JP2K    = 17
+    DIB     = 18
 
     def __str__(self) -> str:
         return FORMAT_NAMES[self]
@@ -81,6 +82,7 @@ FORMAT_NAMES: Dict[ImFormat, str] = {
     ImFormat.DDS    : 'DDS',
     ImFormat.HEIF   : 'HEIF',
     ImFormat.JP2K   : 'JPEG 2000',
+    ImFormat.DIB    : 'DIB',
 }
 
 class ImError(Exception):
@@ -446,6 +448,10 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo:
         # https://docs.microsoft.com/en-us/windows/win32/direct3ddds/dds-header
         height, width = unpack("<II", data[12:20])
         return ImInfo(width, height, ImFormat.DDS)
+    elif size >= 14 and data.startswith(b"\x28\0\0\0") and data[12:14] == b"\x01\0" and data[15] == 0:
+        # DIB
+        width, height = unpack("<ii", data[4:12])
+        return ImInfo(width, abs(height), ImFormat.DIB)
     elif size >= 30 and data[1] < 2 and data[2] < 12 and is_tga(input):
         # TGA
         width, height = unpack("<HH", data[12:16])

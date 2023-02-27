@@ -160,8 +160,11 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo:
     """
 
     data = input.read(30)
-    meta = fstat(input.fileno())
-    size = meta.st_size
+    try:
+        meta = fstat(input.fileno())
+        size = meta.st_size
+    except:
+        size = len(data)
 
     if size >= 10 and (data.startswith(b'GIF87a') or data.startswith(b'GIF89a')):
         # GIFs

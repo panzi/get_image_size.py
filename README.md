@@ -45,6 +45,7 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo: ...
 * QOI
 * TGA
 * TIFF
+* VTF
 * WEBP
 * XCF
 

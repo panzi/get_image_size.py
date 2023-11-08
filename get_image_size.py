@@ -460,7 +460,7 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo:
     elif size >= 20 and data.startswith(b'VTF\0'):
         # VTF
         header_size, width, height = unpack("<IHH", data[12:20])
-        if header_size < 10:
+        if header_size < 20:
             raise ParserError(ImFormat.VTF)
         return ImInfo(width, height, ImFormat.VTF)
     elif size >= 30 and data[1] < 2 and data[2] < 12 and is_tga(input):

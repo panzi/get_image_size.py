@@ -60,6 +60,7 @@ class ImFormat(Enum):
     HEIF    = 16
     JP2K    = 17
     DIB     = 18
+    VTF     = 19
 
     def __str__(self) -> str:
         return FORMAT_NAMES[self]
@@ -83,6 +84,7 @@ FORMAT_NAMES: Dict[ImFormat, str] = {
     ImFormat.HEIF   : 'HEIF',
     ImFormat.JP2K   : 'JPEG 2000',
     ImFormat.DIB    : 'DIB',
+    ImFormat.VTF    : 'VTF',
 }
 
 class ImError(Exception):
@@ -455,6 +457,12 @@ def get_image_size_from_reader(input: IO[bytes]) -> ImInfo:
         # DIB
         width, height = unpack("<ii", data[4:12])
         return ImInfo(width, abs(height), ImFormat.DIB)
+    elif size >= 20 and data.startswith(b'VTF\0'):
+        # VTF
+        header_size, width, height = unpack("<IHH", data[12:20])
+        if header_size < 10:
+            raise ParserError(ImFormat.VTF)
+        return ImInfo(width, height, ImFormat.VTF)
     elif size >= 30 and data[1] < 2 and data[2] < 12 and is_tga(input):
         # TGA
         width, height = unpack("<HH", data[12:16])
